@@ -14,6 +14,11 @@ def _cart_id(request):
     return cart
 
 def add_cart(request, product_id):
+    if request.method == 'POST':
+        color = request.POST.get('color')
+        size = request.POST.get('size')
+    # return HttpResponse(color + ' ' + size)
+
     product = Product.objects.get(id=product_id)
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
@@ -57,6 +62,10 @@ def remove_cart_item(request, product_id):
 
 
 def cart(request, total=0, quantity=0, cart_item=None):
+    tax = 0
+    cart_items = {}
+    grand_total = 0
+
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
         cart_items = CartItem.objects.filter(cart=cart, is_active=True)
