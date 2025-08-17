@@ -12,7 +12,7 @@ class Cart(models.Model):
 
 class CartItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    variation = models.ManyToManyField(Variation, blank=True)
+    variation = models.ManyToManyField(Variation, blank=True) # will create new table with cart_item_id and variation_id
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
     is_active = models.BooleanField(default=True)

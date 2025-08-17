@@ -5,8 +5,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from carts.models import Cart, CartItem
 from store.models import Product, Variation
 
-
-# Create your views here.
 def _cart_id(request):
     cart = request.session.session_key
     if not cart:
@@ -14,30 +12,27 @@ def _cart_id(request):
     return cart
 
 def add_cart(request, product_id):
+    #  ============= ============ CREATING CART ============== ==============
     product = Product.objects.get(id=product_id)
     product_variation = []
     if request.method == 'POST':
-
         for item in request.POST:
             key = item
             value = request.POST[key]
             try:
                 variation = Variation.objects.get(product=product, variation_category__iexact=key,variation_value__iexact=value)
                 product_variation.append(variation)
-                print(product_variation)
             except:
                 pass
 
-    # return HttpResponse(color + ' ' + size)
-
-
     try:
-        cart = Cart.objects.get(cart_id=_cart_id(request))
+        cart = Cart.objects.get(cart_id=_cart_id(request)) # get or creating the (session key/cart id) for this product.
     except Cart.DoesNotExist:
         cart = Cart.objects.create(cart_id=_cart_id(request))
-
     cart.save()
+    #  ============= ============ END OF CREATING CART ============== ==============
 
+    #  ============= ============ CREATING/UPDATING CART ITEM ============== ==============
     is_cart_item_exist = CartItem.objects.filter(product=product, cart=cart).exists()
     if is_cart_item_exist:
         cart_item = CartItem.objects.filter(product=product, cart=cart)
@@ -61,7 +56,7 @@ def add_cart(request, product_id):
             item.save()
 
         else:
-            item = CartItem.objects.create(product=product, cart=cart, quantity=1)
+            item = CartItem.objects.create(product=product, cart=cart, quantity=1) # creating new cart Item
             if len(product_variation) > 0:
                 item.variation.clear()
                 item.variation.add(*product_variation)
@@ -76,6 +71,7 @@ def add_cart(request, product_id):
             cart_item.variation.clear()
             cart_item.variation.add(*product_variation)
         cart_item.save()
+#  ============= ============ END OF CREATING/UPDATING CART ITEM ============== ==============
     return redirect('cart')
 
 def remove_cart(request, product_id, cart_item_id):
