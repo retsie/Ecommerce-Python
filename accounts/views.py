@@ -1,9 +1,13 @@
+from itertools import product
+
 from django.contrib import messages, auth
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from accounts.forms import RegisterForm
+from carts.models import Cart, CartItem
 from .models import Account
+from carts.views import _cart_id
 
 #verification email
 from django.contrib.sites.shortcuts import get_current_site
@@ -12,6 +16,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
+import requests
 
 # from django.core.mail import send_mail, EmailMessage
 # from django.utils.encoding import force_bytes
@@ -63,14 +68,69 @@ def login(request):
         password = request.POST['password']
         user = auth.authenticate(email=email, password=password)
         if user is not None:
+            try:
+                cart = Cart.objects.get(cart_id=_cart_id(request))
+                is_cart_item_exist = CartItem.objects.filter(cart=cart ).exists()
+                if is_cart_item_exist:
+                    cart_items = CartItem.objects.filter(cart=cart)
+
+                    #Getting the product variation by cart id
+                    product_variation = []
+                    id_cart = []
+                    for item in cart_items:
+                        product_variation.append(list(item.variation.all()))
+                        id_cart.append(item.id)
+
+                    #Get the cart items from the
+                    cart_items = CartItem.objects.filter(user=user)
+                    existing_variation = []
+                    id = []
+                    for item in cart_items:
+                        existing_variation.append(list(item.variation.all()))
+                        id.append(item.id)
+
+                    for pr in product_variation:
+                        print(pr)
+                        if pr in existing_variation:
+                            index = existing_variation.index(pr)
+                            item_id = id[index]
+                            item = CartItem.objects.get(id=item_id)
+                            item.quantity +=1
+                            item.user = user
+                            item.save()
+                            index_cart = product_variation.index(pr)
+                            item_cart_id = id_cart[index_cart]
+                            item_to_delete = CartItem.objects.get(id=item_cart_id)
+                            item_to_delete.is_active = False
+                            item_to_delete.save()
+
+                        else:
+                            cart_items = CartItem.objects.filter(cart=cart, is_active=True)
+                            for item in cart_items:
+                                item.user = user
+                                item.save()
+
+
+            except:
+                pass
+
             auth.login(request, user)
             messages.success(request, 'You are logged in')
-            return redirect('dashboard')
+            url = request.META.get('HTTP_REFERER')
+            try:
+                query = requests.utils.urlparse(url).query
+                params = dict(x.split('=') for x in query.split('&'))
+                if 'next' in params:
+                    next_page = params['next']
+                    return redirect(next_page)
+            except:
+                return redirect('dashboard')
+
         else:
             messages.error(request, 'Email or password is incorrect')
             return redirect('login')
-
     return render(request, 'accounts/login.html')
+
 
 @login_required(login_url='login')
 def logout(request):
