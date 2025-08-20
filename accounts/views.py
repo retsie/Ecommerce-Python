@@ -89,26 +89,45 @@ def login(request):
                         existing_variation.append(list(item.variation.all()))
                         id.append(item.id)
 
+                    item_to_update = []
+                    ids = []
                     for pr in product_variation:
-                        print(pr)
+                        # print(pr)
                         if pr in existing_variation:
-                            index = existing_variation.index(pr)
-                            item_id = id[index]
-                            item = CartItem.objects.get(id=item_id)
-                            item.quantity +=1
-                            item.user = user
-                            item.save()
                             index_cart = product_variation.index(pr)
                             item_cart_id = id_cart[index_cart]
-                            item_to_delete = CartItem.objects.get(id=item_cart_id)
-                            item_to_delete.is_active = False
-                            item_to_delete.save()
+                            ids.append(item_cart_id)
 
-                        else:
-                            cart_items = CartItem.objects.filter(cart=cart, is_active=True)
-                            for item in cart_items:
-                                item.user = user
-                                item.save()
+                            index = existing_variation.index(pr)
+                            item_id = id[index]
+                            ids.append(item_id)
+                            item_to_update.append({'to_update': item_id, 'to_delete': item_cart_id})
+
+                    cart_items = CartItem.objects.filter(id__in=ids)
+                    cart_items_map = {p.id: p for p in cart_items}
+
+                    updated_cart_items = {}
+                    for item in item_to_update:
+                        cart_item_to_update = cart_items_map.get(item['to_update'])
+                        cart_item_to_delete = cart_items_map.get(item['to_delete'])
+
+                        cart_item_to_update.user = user
+                        cart_item_to_update.quantity = cart_item_to_update.quantity + cart_item_to_delete.quantity
+
+                        cart_item_to_delete.is_active = False
+
+                        updated_cart_items[item['to_update']] = cart_item_to_update
+                        updated_cart_items[item['to_delete']] = cart_item_to_delete
+
+                    CartItem.objects.bulk_update(updated_cart_items.values(), ["user", "quantity", "is_active"])
+
+                    cart_items = CartItem.objects.filter(cart=cart, is_active=True)
+                    cart_items_map_cart = {p.id: p for p in cart_items}
+                    for item in cart_items:
+                        cart_item = cart_items_map_cart.get(item.id)
+                        if cart_item:
+                            cart_item.user = user
+                    CartItem.objects.bulk_update(cart_items_map_cart.values(), ["user"])
 
 
             except:
