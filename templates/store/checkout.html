@@ -3,9 +3,9 @@
 {% block content %}
 <section class="section-content padding-y bg">
 <div class="container">
-
+    {% include 'includes/alerts.html' %}
 <!-- ============================ COMPONENT 1 ================================= -->
-<form action="{% url 'checkout' %}" method="post">
+<form action="{% url 'place_order' %}" method="POST">
 <div class="row">
 	<aside class="col-lg-6">
 <div class="card">
@@ -29,18 +29,18 @@
                     <input type="email" class="form-control" id="email" name="email" placeholder="Email Address" required>
                 </div>
                 <div class="col form-group">
-                    <label for="phone_number">Phone Number</label>
-                    <input type="text" class="form-control" id="phone_number" name="phone_number" placeholder="Phone Number" required>
+                    <label for="phone">Phone Number</label>
+                    <input type="text" class="form-control" id="phone" name="phone" placeholder="Phone Number" required>
                 </div>
             </div>
             <div class="form-row">
                 <div class="col form-group">
-                    <label for="address_line_1">Address Line 1</label>
-                    <input type="text" class="form-control" id="address_line_1" name="address_line_1" placeholder="Address Line 1" required>
+                    <label for="address_line1">Address Line 1</label>
+                    <input type="text" class="form-control" id="address_line1" name="address_line1" placeholder="Address Line 1" required>
                 </div>
                 <div class="col form-group">
-                    <label for="address_line_2">Address Line 2</label>
-                    <input type="text" class="form-control" id="address_line_2" name="address_line_2" placeholder="Address Line 2">
+                    <label for="address_line2">Address Line 2</label>
+                    <input type="text" class="form-control" id="address_line2" name="address_line2" placeholder="Address Line 2">
                 </div>
             </div>
 
