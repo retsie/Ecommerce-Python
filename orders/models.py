@@ -2,6 +2,7 @@
 from django.db import models
 
 from accounts.models import Account
+from carts.models import CartItem
 from store.models import Product, Variation
 
 
@@ -61,10 +62,8 @@ class OrderProduct(models.Model):
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    variation = models.ForeignKey(Variation, on_delete=models.CASCADE)
-    color = models.CharField(max_length=50, blank=True)
-    size = models.CharField(max_length=50, blank=True)
-    quantity = models.IntegerField()
+    variation = models.ManyToManyField(Variation, blank=True)
+    quantity = models.IntegerField(default=0)
     product_price = models.FloatField()
     ordered = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
