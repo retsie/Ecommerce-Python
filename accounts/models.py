@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
+from chiekart import settings
+
+
 class MyAccountManager(BaseUserManager):
     use_in_migration = True
     def create_user(self, first_name, last_name, username, email, password=None):
@@ -65,6 +68,21 @@ class Account(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return self.is_admin
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(Account, on_delete=models.CASCADE)
+    address_line_1 = models.CharField(max_length=100, blank=True)
+    address_line_2 = models.CharField(max_length=100, blank=True)
+    profile_picture = models.ImageField(upload_to='userprofile', blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    state = models.CharField(max_length=100, blank=True)
+    country = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return self.user.first_name
+
+    def full_address(self):
+        return f'{self.address_line_1} {self.address_line_2}'
 
 
 
