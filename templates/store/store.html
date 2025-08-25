@@ -148,11 +148,26 @@
 			<figcaption class="info-wrap">
 				<div class="fix-height">
 					<a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
+                    <div class="rating-star">
+                    {% if product.countReviews > 0 %}
+                    <span>
+                        <i class="fa fa-star{% if product.averageReview < 0.5 %}-o{% elif product.averageReview >= 0.5 and product.averageReview < 1 %}-half {% endif %}" aria-hidden="true"></i>
+                        <i class="fa fa-star{% if product.averageReview < 1.5 %}-o{% elif product.averageReview >= 1.5 and product.averageReview < 2 %}-half {% endif %}" aria-hidden="true"></i>
+                        <i class="fa fa-star{% if product.averageReview < 2.5 %}-o{% elif product.averageReview >= 2.5 and product.averageReview < 3 %}-half {% endif %}" aria-hidden="true"></i>
+                        <i class="fa fa-star{% if product.averageReview < 3.5 %}-o{% elif product.averageReview >= 3.5 and product.averageReview < 4 %}-half {% endif %}" aria-hidden="true"></i>
+                        <i class="fa fa-star{% if product.averageReview < 4.5 %}-o{% elif product.averageReview >= 4.5 and product.averageReview < 5 %}-half {% endif %}" aria-hidden="true"></i>
+                    </span>
+                    <span>{{ product.countReviews }} reviews</span>
+                    {% else %}
+                    <span>Not Rating yet</span>
+                    {% endif %}
+                </div>
 					<div class="price-wrap mt-2">
 						<span class="price">${{ product.price }}</span>
 {#						<del class="price-old">$1980</del>#}
 					</div> <!-- price-wrap.// -->
 				</div>
+
 				<a href="{{ product.get_url }}" class="btn btn-block btn-primary-light">View Details </a>
 			</figcaption>
 		</figure>
